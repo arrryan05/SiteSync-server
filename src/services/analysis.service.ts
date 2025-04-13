@@ -1,8 +1,8 @@
-import { fetchPageSpeedInsights } from './pagespeed.service';
-import { analyzeWithGemini } from './gemini.service';
-import { extractAllRoutes } from './route-extractor.service';
-import { runWithConcurrency } from '../utils/ratelimit.util';
-
+import { fetchPageSpeedInsights } from "./pagespeed.service";
+import { analyzeWithGemini } from "./gemini.service";
+import { extractAllRoutes } from "./route-extractor.service";
+import { runWithConcurrency } from "../utils/ratelimit.util";
+import extractRelevantPageSpeedData from "../utils/extractPageSpeedData.util";
 
 // export async function analyzeWebsite(url: string): Promise<string> {
 //   try {
@@ -11,7 +11,6 @@ import { runWithConcurrency } from '../utils/ratelimit.util';
 //     console.log('Extracted Routes:');
 //     routes.forEach(route => console.log(route));
 //     const performanceData = await fetchPageSpeedInsights(url);
-
 
 //     const prompt = `
 //       Analyze the website: ${url}.
@@ -28,33 +27,39 @@ import { runWithConcurrency } from '../utils/ratelimit.util';
 //   }
 // }
 
-
-export async function analyzeWebsite(domain: string): Promise<string> {
+export async function analyzeWebsite(url: string): Promise<string> {
   try {
-    const routes = await extractAllRoutes(domain);
-    console.log('Extracted Routes:');
-    routes.forEach(route => console.log(route));
+    const routes = await extractAllRoutes(url);
+    console.log("Extracted Routes:", routes);
 
-    const tasks = routes.map(route => async () => {
-      const performanceData = await fetchPageSpeedInsights(route);
+    const pageDataArray = await runWithConcurrency(
+      routes,
+      2,
+      async (route) => ({
+        route,
+        performance: await fetchPageSpeedInsights(route),
+      })
+    );
 
-      const prompt = `
-Page: ${route}
--------------------------------
-Performance Metrics:
-${JSON.stringify(performanceData.lighthouseResult?.audits, null, 2)}
-
-Please provide a summary of performance issues and optimization recommendations.
+    // Analyze each using Gemini (limit concurrency to 2)
+    const geminiResponses = await runWithConcurrency(
+      pageDataArray,
+      2,
+      async ({ route, performance }) => {
+        const trimmedData = extractRelevantPageSpeedData(performance);
+        const prompt = `
+        Analyze the page: ${route}.
+        Here is its PageSpeed Insights JSON. Summarize performance, highlight issues, and give suggestions.
+        \n\nPerformance Report:\n${JSON.stringify(trimmedData, null, 2)}
       `;
+        const summary = await analyzeWithGemini(prompt);
+        return `---\n🧠 **Insights for ${route}**\n${summary}`;
+      }
+    );
 
-      const geminiResponse = await analyzeWithGemini(prompt);
-      return `=== Analysis for ${route} ===\n${geminiResponse}\n==============================\n`;
-    });
-
-    const results = await runWithConcurrency(tasks, 2); // Limit concurrency to 2
-    return results.join('\n');
+    return geminiResponses.join("\n\n");
   } catch (error) {
-    console.error('AnalyzeWebsite Error:', error);
+    console.error("AnalyzeWebsite Error:", error);
     throw error;
   }
 }
