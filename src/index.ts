@@ -1,17 +1,33 @@
 import express from 'express';
 import analysisRoutes from './routes/analysis.route';
 import projectRouter from "./routes/project.route";
+import authRoutes from "./routes/auth.route";
+import swaggerUi from "swagger-ui-express";
+import swaggerJsdoc from "swagger-jsdoc";
+import { swaggerOptions } from "./swaggerOptions";
 
-import { CorsOptions } from 'cors';
+import cors from 'cors';
 import seedRoutes from "./routes/seed.route";
 
 const app = express();
 app.use(express.json());
 
+app.use(cors({
+  origin: "http://localhost:3000",  
+  credentials: true,                
+}));
+
 
 // Routes
 app.use('/api/analysis', analysisRoutes);
 app.use("/api/project", projectRouter);
+app.use("/api/auth", authRoutes);
+
+
+const specs = swaggerJsdoc(swaggerOptions); 
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+
 
 app.use("/api", seedRoutes);
 

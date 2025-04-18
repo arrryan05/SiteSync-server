@@ -7,14 +7,6 @@ export interface CreateProjectRequest {
   userId: string;
 }
 
-// Response type for a project.
-export interface ProjectResponse {
-  id: string;
-  name: string;
-  url: string;
-  analysisSummary: string;
-  createdAt: Date;
-}
 
 // Response type for listing projects.
 export interface GetProjectListResponse {
@@ -28,11 +20,28 @@ export interface GetProjectDetailsRequest {
 }
 
 // Response type for a project.
-export interface GetProjectResponse {
+export interface MetricDetail {
+  value: string;
+  recommendedSteps: string[];
+}
+
+export interface PerformanceMetrics {
+  FCP: MetricDetail;
+  LCP: MetricDetail;
+  CLS: MetricDetail;
+  TBT: MetricDetail;
+}
+
+export interface AnalysisInsight {
+  route: string;
+  performanceData: PerformanceMetrics[];
+}
+
+export interface ProjectResponse {
   id: string;
-  name: string;
+//   name: string;
   website: string;
-  analysisSummary: string;
+  analysisSummary: AnalysisInsight[]; 
   status: string;
   createdAt: Date;
   updatedAt: Date;
