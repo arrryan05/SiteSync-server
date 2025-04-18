@@ -7,6 +7,7 @@ import {
 } from "../types/project.types";
 import {
   createProject,
+  deleteProject,
   getAllProjects,
   getProjectDetails,
 } from "../services/project.service";
@@ -97,5 +98,32 @@ export const getProjectDetailsController = async (
     console.error("Error fetching project details:", error);
     res.status(500).json({ error: "Failed to fetch project details" });
     return;
+  }
+};
+
+export const deleteProjectController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: "Not authenticated" });
+      return;
+    }
+
+    const { projectId } = req.params;
+    if (!projectId) {
+      res.status(400).json({ error: "Project ID is required" });
+      return;
+    }
+
+    await deleteProject(projectId, userId);
+    res.status(200).json({ success: true });
+  } catch (err: any) {
+    console.error("Error deleting project:", err);
+    res
+      .status(err.message === "Not authorized" ? 403 : 500)
+      .json({ error: err.message });
   }
 };

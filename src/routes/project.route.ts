@@ -3,6 +3,7 @@
 import express from "express";
 import {
   createProjectController,
+  deleteProjectController,
   getAllProjectsController,
   getProjectDetailsController,
 } from "../controllers/project.controller";
@@ -19,6 +20,8 @@ router.post("/create",verifyToken, createProjectController);
 
 router.get("/list", verifyToken, getAllProjectsController);
 router.get("/:projectId", verifyToken, getProjectDetailsController);
+router.delete("/:projectId", verifyToken, deleteProjectController);
+
 
 
 
