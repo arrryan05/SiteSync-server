@@ -21,7 +21,6 @@ export async function analyzeWebsite(url: string): Promise<string> {
       })
     );
 
-    // 3. For each page data, build a prompt and call Gemini concurrently.
     const geminiResponses = await runWithConcurrency(
       pageDataArray,
       2,
