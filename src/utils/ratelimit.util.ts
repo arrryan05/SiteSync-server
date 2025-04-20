@@ -1,21 +1,27 @@
-export async function runWithConcurrency<T>(
-    tasks: (() => Promise<T>)[],
-    concurrency: number
-  ): Promise<T[]> {
-    const results: T[] = [];
+// src/utils/concurrency.util.ts
+
+export async function runWithConcurrency<T, R>(
+    tasks: T[],
+    concurrency: number,
+    taskFn: (task: T) => Promise<R>
+  ): Promise<R[]> {
+    const results: R[] = [];
     let index = 0;
   
-    const workers = new Array(concurrency).fill(null).map(async () => {
+    async function worker() {
       while (index < tasks.length) {
         const currentIndex = index++;
         try {
-          results[currentIndex] = await tasks[currentIndex]();
-        } catch (err) {
-          throw err;
+          const result = await taskFn(tasks[currentIndex]);
+          results[currentIndex] = result;
+        } catch (error) {
+          console.error(`Task failed at index ${currentIndex}:`, error);
+          results[currentIndex] = null as any;
         }
       }
-    });
+    }
   
+    const workers = Array.from({ length: concurrency }, () => worker());
     await Promise.all(workers);
     return results;
   }

@@ -7,9 +7,11 @@
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
+    "moduleResolution": "node",
+    "typeRoots": ["./src/types", "./node_modules/@types"],
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules"]
 } 
