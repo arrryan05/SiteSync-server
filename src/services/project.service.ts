@@ -27,7 +27,6 @@ export async function createProject(
     },
   });
 
-  // Safely coerce JSON → AnalysisInsight[]
   const raw = project.analysis;
   const analysisSummary: AnalysisInsight[] = Array.isArray(raw)
     ? (raw as unknown as AnalysisInsight[])

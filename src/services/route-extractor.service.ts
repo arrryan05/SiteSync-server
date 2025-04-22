@@ -6,7 +6,6 @@ import * as cheerio from "cheerio";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 
-// Enable stealth mode to bypass bot detection
 puppeteer.use(StealthPlugin());
 
 const HEADERS = {
@@ -34,12 +33,10 @@ export async function extractAllRoutes(domain: string): Promise<string[]> {
     console.warn("robots.txt or sitemap fetch failed:", err);
   }
 
-  // If sitemap didn't work or returned no routes, fallback to crawling
   if (!routes || routes.length === 0) {
     routes = await crawlWithPuppeteer(domain);
     console.log("Extracted routes from crawling.");
   }
-  // Return the routes (should be limited to 5 by our crawl functions)
   return routes;
 }
 
@@ -57,7 +54,6 @@ async function extractFromSitemap(sitemapUrl: string): Promise<string[]> {
     isArray: (name, jpath) => ["urlset.url"].includes(jpath),
   });
   const parsed = parser.parse(xml);
-//   console.log(parsed);
 
   if (parsed.urlset && parsed.urlset.url) {
     console.log("==================================");
@@ -78,38 +74,6 @@ async function extractFromSitemap(sitemapUrl: string): Promise<string[]> {
   return [];
 }
 
-// async function crawlWithCheerio(baseUrl: string): Promise<string[]> {
-//   const visited = new Set<string>();
-//   const toVisit = [baseUrl];
-
-//   while (toVisit.length && visited.size < 5) {
-//     const url = toVisit.pop();
-//     if (!url || visited.has(url)) continue;
-
-//     try {
-//       const html = await axios.get(url, { headers: HEADERS }).then(res => res.data);
-//       const $ = cheerio.load(html);
-
-//       const links = $("a")
-//         .map((_, el) => $(el).attr("href"))
-//         .get()
-//         .filter(href => href && href.startsWith("/"))
-//         .map(path => new URL(path, baseUrl).href);
-
-//       links.forEach(link => {
-//         if (!visited.has(link) && visited.size < 5) {
-//           toVisit.push(link);
-//         }
-//       });
-
-//       visited.add(url);
-//     } catch (err) {
-//       console.warn('Error crawling:', url, err);
-//     }
-//   }
-
-//   return Array.from(visited);
-// }
 
 async function crawlWithPuppeteer(baseUrl: string): Promise<string[]> {
   const browser = await puppeteer.launch({

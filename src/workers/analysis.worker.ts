@@ -1,6 +1,12 @@
 import { analysisQueue } from "../lib/queue";
 import { prisma } from "../config/prisma";
 import { analyzeWebsite } from "../services/analysis.service";
+import Redis from "ioredis";
+
+const redisPub = new Redis({
+  host: process.env.REDIS_HOST,
+  port: Number(process.env.REDIS_PORT),
+});
 
 analysisQueue.process(5, async (job) => {  // Process up to 5 jobs concurrently
   const { projectId, website } = job.data;
@@ -30,6 +36,10 @@ analysisQueue.process(5, async (job) => {  // Process up to 5 jobs concurrently
       where: { id: projectId },
       data: { analysis: parsedResult, status: "complete" },
     });
+    await redisPub.publish(
+      `project:${projectId}`,
+      JSON.stringify({ projectId, routeInsight: parsedResult })
+    );
     
     console.log(`Project ${projectId} updated successfully.`);
     return Promise.resolve();
@@ -46,3 +56,5 @@ analysisQueue.process(5, async (job) => {  // Process up to 5 jobs concurrently
     throw error;
   }
 });
+
+

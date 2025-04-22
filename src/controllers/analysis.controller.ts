@@ -1,36 +1,37 @@
 import { Request, Response } from 'express';
 import { analyzeWebsite } from '../services/analysis.service';
+// import { analyzeWebsiteGenerator } from '../services/analysis.service';
 import { WebsiteAnalysisRequest, WebsiteAnalysisResponse } from '../types';
 import { analysisQueue } from '../lib/queue';
 import { prisma } from "../config/prisma";
 
 
-export const analyzeWebsiteEndpoint = async (
-  req: Request<{}, {}, WebsiteAnalysisRequest>,
-  res: Response
-): Promise<void> => {
-  try {
-    const { url } = req.body;
+// export const analyzeWebsiteEndpoint = async (
+//   req: Request<{}, {}, WebsiteAnalysisRequest>,
+//   res: Response
+// ): Promise<void> => {
+//   try {
+//     const { url } = req.body;
 
-    if (!url) {
-      res.status(400).json({ error: 'URL is required' });
-      return;
-    }
+//     if (!url) {
+//       res.status(400).json({ error: 'URL is required' });
+//       return;
+//     }
 
-    const analysis = await analyzeWebsite(url);
+//     const analysis = await analyzeWebsiteGenerator(url);
 
-    const response: WebsiteAnalysisResponse = {
-      analysis,
-      timestamp: new Date().toISOString(),
-      url,
-    };
+//     const response: WebsiteAnalysisResponse = {
+//       analysis,
+//       timestamp: new Date().toISOString(),
+//       url,
+//     };
 
-    res.status(200).json(response);
-  } catch (error) {
-    console.error('Error in analysis controller:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
+//     res.status(200).json(response);
+//   } catch (error) {
+//     console.error('Error in analysis controller:', error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
 
 
 export const rerunAnalysisController = async (req: Request, res: Response): Promise<void> => {

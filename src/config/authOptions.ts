@@ -33,7 +33,7 @@ const authOptions = {
     strategy: "jwt" as const,
   },
   pages: {
-    signIn: "/auth/signin", // Optional: create a custom sign-in page
+    signIn: "/auth/signin", 
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

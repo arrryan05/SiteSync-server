@@ -7,14 +7,13 @@ export function signToken(payload: object): string {
   return jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
 }
 
-
-
 export const verifyToken = (
   req: Request,
   res: Response,
   next: NextFunction
 ): void => {
   const authHeader = req.headers.authorization;
+  console.log("_______________________________",authHeader)
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     res.status(401).json({ error: "Missing or invalid token" });
@@ -25,10 +24,12 @@ export const verifyToken = (
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-    req.user = { userId: decoded.userId }; // Attach user to request
-    next(); // ✅ continue to the next middleware/controller
+    req.user = { userId: decoded.userId }; 
+    next(); 
   } catch (err) {
     res.status(401).json({ error: "Invalid token" });
     return;
   }
 };
+
+

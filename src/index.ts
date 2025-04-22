@@ -2,6 +2,7 @@ import express from 'express';
 import analysisRoutes from './routes/analysis.route';
 import projectRouter from "./routes/project.route";
 import authRoutes from "./routes/auth.route";
+import streamRoutes from "./routes/stream.route";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
 import { swaggerOptions } from "./swaggerOptions";
@@ -22,6 +23,8 @@ app.use(cors({
 app.use('/api/analysis', analysisRoutes);
 app.use("/api/project", projectRouter);
 app.use("/api/auth", authRoutes);
+app.use("/api", streamRoutes);
+
 
 
 const specs = swaggerJsdoc(swaggerOptions); 

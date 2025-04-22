@@ -18,19 +18,17 @@ export async function analyzeWebsite(url: string): Promise<string> {
       async (route) => ({
         route,
         performance: await fetchPageSpeedInsights(route),
-      })
+      })  
     );
 
     const geminiResponses = await runWithConcurrency(
       pageDataArray,
       2,
       async ({ route, performance }) => {
-        // Extract trimmed performance metrics
         const trimmedData = extractRelevantPageSpeedData(performance);
-        // Create a prompt instructing Gemini to return strict JSON output.
+        console.log("trimmed data",trimmedData);
         const prompt = createGeminiPrompt(route, trimmedData);
 
-        // Call Gemini API with the prompt
         let response = await analyzeWithGemini(prompt);
         console.log("Raw Gemini response for", route, ":", response);
 
@@ -76,3 +74,4 @@ export async function analyzeWebsite(url: string): Promise<string> {
     throw error;
   }
 }
+

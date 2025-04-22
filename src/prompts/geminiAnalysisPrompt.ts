@@ -1,38 +1,5 @@
 // src/prompts/geminiAnalysisPrompt.ts
 
-/**
- * Creates a Gemini API prompt instructing the model to return performance metrics
- * in a specific JSON schema.
- *
- * Expected JSON schema:
- * {
- *   "route": string,
- *   "performanceData": [
- *     {
- *       "FCP": {
- *         "value": string,
- *         "recommendedSteps": string[]
- *       },
- *       "LCP": {
- *         "value": string,
- *         "recommendedSteps": string[]
- *       },
- *       "CLS": {
- *         "value": string,
- *         "recommendedSteps": string[]
- *       },
- *       "TBT": {
- *         "value": string,
- *         "recommendedSteps": string[]
- *       }
- *     }
- *   ]
- * }
- *
- * @param route - The page route being analyzed.
- * @param trimmedData - A subset of PageSpeed Insights JSON containing the relevant metrics.
- * @returns A string prompt for the Gemini API.
- */
 export function createGeminiPrompt(route: string, trimmedData: any): string {
   return `
   You are an expert website performance analyst. Analyze the following PageSpeed Insights data for the webpage "${route}". 
