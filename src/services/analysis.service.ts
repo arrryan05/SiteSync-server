@@ -18,23 +18,25 @@ export async function analyzeWebsite(url: string): Promise<string> {
       async (route) => ({
         route,
         performance: await fetchPageSpeedInsights(route),
-      })  
+      })
     );
 
     const geminiResponses = await runWithConcurrency(
       pageDataArray,
       2,
-      async ({ route, performance }) => {
+      async (data) => {
+        if (!data) return null;
+        const { route, performance } = data;
         const trimmedData = extractRelevantPageSpeedData(performance);
-        console.log("trimmed data",trimmedData);
+        console.log("trimmed data", trimmedData);
         const prompt = createGeminiPrompt(route, trimmedData);
 
         let response = await analyzeWithGemini(prompt);
         console.log("Raw Gemini response for", route, ":", response);
 
         const firstBrace = response.indexOf("{");
-        const lastBrace  = response.lastIndexOf("}");
-        
+        const lastBrace = response.lastIndexOf("}");
+
         let jsonString: string;
         if (firstBrace !== -1 && lastBrace !== -1) {
           jsonString = response.slice(firstBrace, lastBrace + 1);
@@ -43,7 +45,7 @@ export async function analyzeWebsite(url: string): Promise<string> {
           // Fallback to the raw response
           jsonString = response;
         }
-        
+
         // Attempt to parse the sanitized response.
         try {
           const parsed = JSON.parse(jsonString);
@@ -51,7 +53,10 @@ export async function analyzeWebsite(url: string): Promise<string> {
           parsed.route = route;
           return parsed;
         } catch (parseError) {
-          console.error(`Failed to parse Gemini response for route ${route}:`, parseError);
+          console.error(
+            `Failed to parse Gemini response for route ${route}:`,
+            parseError
+          );
           return {
             route,
             performanceData: [
@@ -59,9 +64,9 @@ export async function analyzeWebsite(url: string): Promise<string> {
                 FCP: { value: "N/A", recommendedSteps: ["Unable to analyze"] },
                 LCP: { value: "N/A", recommendedSteps: ["Unable to analyze"] },
                 CLS: { value: "N/A", recommendedSteps: ["Unable to analyze"] },
-                TBT: { value: "N/A", recommendedSteps: ["Unable to analyze"] }
-              }
-            ]
+                TBT: { value: "N/A", recommendedSteps: ["Unable to analyze"] },
+              },
+            ],
           };
         }
       }
@@ -74,4 +79,3 @@ export async function analyzeWebsite(url: string): Promise<string> {
     throw error;
   }
 }
-
