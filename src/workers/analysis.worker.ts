@@ -9,12 +9,12 @@ const redisPub = new Redis({
 });
 
 analysisQueue.process(5, async (job) => {  // Process up to 5 jobs concurrently
-  const { projectId, website } = job.data;
+  const { projectId, website, name } = job.data;
   console.log(`Processing analysis for project ${projectId} with website ${website}`);
   
   try {
     // Call your analysis service to get the analysis result as a string.
-    const analysisResult = await analyzeWebsite(website);
+    const analysisResult = await analyzeWebsite(website,name);
     console.log(analysisResult)
     
     // Attempt to parse the returned analysis result as JSON.

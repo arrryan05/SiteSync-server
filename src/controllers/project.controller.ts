@@ -12,6 +12,7 @@ import {
   getProjectDetails,
 } from "../services/project.service";
 import { analysisQueue } from "../lib/queue";
+import { profileEnd } from "console";
 
 /**
  * Controller to create a new project.
@@ -37,7 +38,7 @@ export const createProjectController = async (
     const project = await createProject(data);
 
     await analysisQueue.add(
-      { projectId: project.id, website: project.website },
+      { projectId: project.id, website: project.website, name },
       { attempts: 3, backoff: { type: "exponential", delay: 5000 } }
     );
 

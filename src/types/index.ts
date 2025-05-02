@@ -13,3 +13,19 @@ export interface GeminiResponse {
     text(): Promise<string>;
   };
 }
+
+export interface PageSpeedData {
+  url: string;
+  overallScore?: number;
+  metrics: {
+    FCP?: string;
+    LCP?: string;
+    CLS?: string;
+    TBT?: string;
+  };
+  diagnostics?: Record<string, any>; // Or you can create a stricter type if needed
+  opportunities: {
+    id: string;
+    score: number;
+  }[];
+}

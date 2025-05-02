@@ -4,9 +4,20 @@ import { extractAllRoutes } from "./route-extractor.service";
 import { runWithConcurrency } from "../utils/ratelimit.util";
 import extractRelevantPageSpeedData from "../utils/extractPageSpeedData.util";
 import { createGeminiPrompt } from "../prompts/geminiAnalysisPrompt";
+import { analyzeAndStore } from "../code-analyzer";
+import { queryTopChunks } from "./vectorSearch.service";
+import { CodeChunkResult } from "../code-analyzer/types";
 
-export async function analyzeWebsite(url: string): Promise<string> {
+export async function analyzeWebsite(
+  url: string,
+  name:string,
+  gitRepoUrl?: string,
+): Promise<string> {
   try {
+    if (gitRepoUrl) {
+      await analyzeAndStore(gitRepoUrl,name);
+    }
+
     // 1. Extract all routes for the given website.
     const routes = await extractAllRoutes(url);
     console.log("Extracted Routes:", routes);
@@ -29,7 +40,12 @@ export async function analyzeWebsite(url: string): Promise<string> {
         const { route, performance } = data;
         const trimmedData = extractRelevantPageSpeedData(performance);
         console.log("trimmed data", trimmedData);
-        const prompt = createGeminiPrompt(route, trimmedData);
+
+        let topChunks: CodeChunkResult[] = [];
+        if (gitRepoUrl) {
+          topChunks = await queryTopChunks(route, trimmedData, "sitesync", 5);
+        }
+        const prompt = createGeminiPrompt(route, trimmedData, topChunks);
 
         let response = await analyzeWithGemini(prompt);
         console.log("Raw Gemini response for", route, ":", response);

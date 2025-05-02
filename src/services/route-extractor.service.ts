@@ -2,7 +2,6 @@
 
 import axios from "axios";
 import { XMLParser } from "fast-xml-parser";
-import * as cheerio from "cheerio";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 
@@ -23,11 +22,11 @@ export async function extractAllRoutes(domain: string): Promise<string[]> {
     const robotsTxt = await axios
       .get(robotsUrl, { headers: HEADERS })
       .then((res) => res.data);
-    console.log("-------------------------------", robotsTxt);
+    // console.log("-------------------------------", robotsTxt);
     if (canFetchSitemap(robotsTxt)) {
-      console.log("Able to fetch sitemap");
+      // console.log("Able to fetch sitemap");
       routes = await extractFromSitemap(sitemapUrl);
-      console.log("Extracted routes from sitemap.");
+      // console.log("Extracted routes from sitemap.");
     }
   } catch (err) {
     console.warn("robots.txt or sitemap fetch failed:", err);
